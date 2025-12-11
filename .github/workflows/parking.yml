@@ -1,0 +1,37 @@
+name: 台南停車位爬蟲 (每30分)
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  scrape_and_save:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run fetch script
+        run: python fetch.py
+
+      - name: Commit and Push CSV
+        run: |
+          git config --global user.name "Parking Bot"
+          git config --global user.email "bot@github.com"
+          git add *.csv
+          git commit -m "Auto: Update parking data" || echo "No changes to commit"
+          git push
